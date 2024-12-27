@@ -1,0 +1,31 @@
+---
+pool: default
+trigger:
+  - main
+stages:
+  - stage: build
+    jobs:
+     - job: jobbuild
+       steps:
+        - task: maven@3
+          inputs:
+            mavemPOMFile: pom.xml
+            publishJUnitResults: true
+            testResultFiles:  '**/surefire-reports/TEST-*.xml'
+            jdkVersionOption: '11'
+            goals: package
+        - task: CopyFiles@2
+          inputs:
+            contents: '**java-hello-world-with-maven/*.jar'
+            targetFolder: $(Build.ArtifactStagingDirectory)
+        - task: PublishBuildArtifacts@1
+          inputs:
+            pathToPublish: $(Build.ArtifactStagingDirectory)
+            artifactName: $(Build.Repository.Name)
+       - task: SonarCloudPublish@3
+         inputs:
+           pollingTimeoutSec: '300'
+
+            
+        
+     
