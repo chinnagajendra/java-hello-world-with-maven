@@ -7,24 +7,33 @@ stages:
     jobs:
      - job: jobbuild
        steps:
-        - task: maven@3
+        - task: maven@4
           inputs:
             mavemPOMFile: pom.xml
             publishJUnitResults: true
             testResultFiles:  '**/surefire-reports/TEST-*.xml'
-            jdkVersionOption: '11'
+            jdkVersionOption: 'default'
             goals: package
         - task: CopyFiles@2
           inputs:
-            contents: '**java-hello-world-with-maven/*.jar'
+            contents: '**/java-hello-world-with-maven/*.jar'
             targetFolder: $(Build.ArtifactStagingDirectory)
         - task: PublishBuildArtifacts@1
           inputs:
             pathToPublish: $(Build.ArtifactStagingDirectory)
             artifactName: $(Build.Repository.Name)
-       - task: SonarCloudPublish@3
-         inputs:
-           pollingTimeoutSec: '300'
+        - task: SonarQubePrepare@4
+          inputs:
+            SonarQube: project
+            scannerMode: 'MSBuild'
+            projectKey: java-hello-world-with-maven
+        - task: SonarQubeAnalyze@4
+          inputs: 
+            sonarQube: project
+            projectKey: java-hello-world-with-maven
+        - task: SonarCloudPublish@4
+          inputs:
+            pollingTimeoutSec: '300'
 
             
         
